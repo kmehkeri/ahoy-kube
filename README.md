@@ -13,9 +13,11 @@ Copy `kube.tfvars` into `kube.tf` and fill in `do_token`  variable. Afterwards:
 
     # Retrieve configuration
     terraform output kubeconfig >kubeconfig.yaml
+    export KUBECONFIG=$(readlink -f kubeconfig.yaml)
 
     # Check cluster info
-    kubectl --kubeconfig=kubeconfig.yaml cluster-info
+    kubectl cluster-info
+    kubectl get nodes
 
     # Destroy cluster
     terraform destroy -var-file=kube.tfvars
