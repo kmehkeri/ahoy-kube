@@ -23,3 +23,41 @@ resource "digitalocean_kubernetes_cluster" "ahoy-kube" {
 output "kubeconfig" {
 	value = "${digitalocean_kubernetes_cluster.ahoy-kube.kube_config.0.raw_config}"
 }
+
+provider "kubernetes" {
+	host = "${digitalocean_kubernetes_cluster.ahoy-kube.endpoint}"
+
+	client_certificate     = "${base64decode(digitalocean_kubernetes_cluster.ahoy-kube.kube_config.0.client_certificate)}"
+	client_key             = "${base64decode(digitalocean_kubernetes_cluster.ahoy-kube.kube_config.0.client_key)}"
+	cluster_ca_certificate = "${base64decode(digitalocean_kubernetes_cluster.ahoy-kube.kube_config.0.cluster_ca_certificate)}"
+}
+
+resource "kubernetes_deployment" "kubernetes-bootcamp" {
+  metadata {
+    name = "kubernetes-bootcamp"
+  }
+
+  spec {
+    replicas = 4
+
+    selector {
+      match_labels {
+        dummy = "dummy"
+      }
+    }
+
+    template {
+      metadata {
+        labels {
+          dummy = "dummy"
+        }
+      }
+      spec {
+        container {
+          image = "gcr.io/google-samples/kubernetes-bootcamp:v1"
+          name  = "kubernetes-bootcamp"
+        }
+      }
+    }
+  }
+}
